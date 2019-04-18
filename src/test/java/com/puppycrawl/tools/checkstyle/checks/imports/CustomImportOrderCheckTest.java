@@ -21,6 +21,7 @@ package com.puppycrawl.tools.checkstyle.checks.imports;
 
 import static com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck.MSG_LEX;
 import static com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck.MSG_LINE_SEPARATOR;
+import static com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck.MSG_LINE_SEPARATOR_PACKAGE;
 import static com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck.MSG_NONGROUP_EXPECTED;
 import static com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck.MSG_NONGROUP_IMPORT;
 import static com.puppycrawl.tools.checkstyle.checks.imports.CustomImportOrderCheck.MSG_ORDER;
@@ -316,7 +317,7 @@ public class CustomImportOrderCheckTest extends AbstractModuleTestSupport {
         checkConfig.addAttribute("customImportOrderRules",
                 "SAME_PACKAGE(3)###THIRD_PARTY_PACKAGE###STANDARD_JAVA_PACKAGE###STATIC");
         final String[] expected = {
-            "5: " + getCheckMessage(MSG_LINE_SEPARATOR, "org.junit.*"),
+            "5: " + getCheckMessage(MSG_LINE_SEPARATOR_PACKAGE, "org.junit.*"),
         };
 
         verify(checkConfig,
@@ -741,7 +742,7 @@ public class CustomImportOrderCheckTest extends AbstractModuleTestSupport {
 
         createChecker(checkConfig);
         final String[] expected = {
-            "3: " + getCheckMessage(MSG_LINE_SEPARATOR,
+            "3: " + getCheckMessage(MSG_LINE_SEPARATOR_PACKAGE,
                 "com.puppycrawl.tools.checkstyle.utils.AnnotationUtil.containsAnnotation"),
             "7: " + getCheckMessage(MSG_LINE_SEPARATOR,
                 "com.sun.accessibility.internal.resources.*"),
@@ -753,4 +754,25 @@ public class CustomImportOrderCheckTest extends AbstractModuleTestSupport {
             expected);
     }
 
+    @Test
+    public void testNoPackage2NoSeparateLineBetweenPackageAndGroups() throws Exception {
+        final DefaultConfiguration checkConfig =
+                createModuleConfig(CustomImportOrderCheck.class);
+        checkConfig.addAttribute("customImportOrderRules",
+                "STATIC###THIRD_PARTY_PACKAGE");
+        checkConfig.addAttribute("sortImportsInGroupAlphabetically", "true");
+        checkConfig.addAttribute("separateLineBetweenGroups", "true");
+        checkConfig.addAttribute("separateLineBetweenPackageAndGroups", "false");
+
+        createChecker(checkConfig);
+        final String[] expected = {
+                "7: " + getCheckMessage(MSG_LINE_SEPARATOR,
+                        "com.sun.accessibility.internal.resources.*"),
+                "11: " + getCheckMessage(MSG_LINE_SEPARATOR, "java.util.Arrays"),
+                "19: " + getCheckMessage(MSG_LINE_SEPARATOR,
+                        "org.apache.commons.beanutils.converters.ArrayConverter"),
+        };
+        verify(checkConfig, getNonCompilablePath("InputCustomImportOrderNoPackage2.java"),
+                expected);
+    }
 }

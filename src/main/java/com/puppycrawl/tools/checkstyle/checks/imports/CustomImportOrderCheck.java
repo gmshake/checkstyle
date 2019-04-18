@@ -363,6 +363,13 @@ public class CustomImportOrderCheck extends AbstractCheck {
      * A key is pointing to the warning message text in "messages.properties"
      * file.
      */
+    // TODO i18n messages.properties
+    public static final String MSG_LINE_SEPARATOR_PACKAGE = "custom.import.order.line.separator.package";
+
+    /**
+     * A key is pointing to the warning message text in "messages.properties"
+     * file.
+     */
     public static final String MSG_LEX = "custom.import.order.lex";
 
     /**
@@ -425,6 +432,9 @@ public class CustomImportOrderCheck extends AbstractCheck {
     /** Force empty line separator between import groups. */
     private boolean separateLineBetweenGroups = true;
 
+    /** Force empty line separator between package define and import groups. */
+    private boolean separateLineBetweenPackageAndGroups = true;
+
     /**
      * Force grouping alphabetically,
      * in <a href="https://en.wikipedia.org/wiki/ASCII#Order"> ASCII sort order</a>.
@@ -468,6 +478,15 @@ public class CustomImportOrderCheck extends AbstractCheck {
      */
     public final void setSeparateLineBetweenGroups(boolean value) {
         separateLineBetweenGroups = value;
+    }
+
+    /**
+     * Setter to force empty line separator between package define and import groups.
+     * @param value
+     *        user value.
+     */
+    public final void setSeparateLineBetweenPackageAndGroups(boolean value) {
+        separateLineBetweenPackageAndGroups = value;
     }
 
     /**
@@ -553,7 +572,15 @@ public class CustomImportOrderCheck extends AbstractCheck {
             final String importGroup = importObject.getImportGroup();
             final String fullImportIdent = importObject.getImportFullPath();
 
-            if (getCountOfEmptyLinesBefore(importObject.getLineNumber()) > 1) {
+            // TODO update xdoc
+            if (separateLineBetweenPackageAndGroups
+                    && previousImportFromCurrentGroup == null
+                    && getCountOfEmptyLinesBefore(importObject.getLineNumber()) > 1) {
+                log(importObject.getLineNumber(), MSG_LINE_SEPARATOR_PACKAGE, fullImportIdent);
+            }
+            if (separateLineBetweenGroups
+                    && previousImportFromCurrentGroup != null
+                    && getCountOfEmptyLinesBefore(importObject.getLineNumber()) > 1) {
                 log(importObject.getLineNumber(), MSG_LINE_SEPARATOR, fullImportIdent);
             }
             if (importGroup.equals(currentGroup)) {
@@ -573,7 +600,7 @@ public class CustomImportOrderCheck extends AbstractCheck {
                     final String nextGroup = getNextImportGroup(currentGroupNumber + 1);
                     if (importGroup.equals(nextGroup)) {
                         if (separateLineBetweenGroups
-                                && getCountOfEmptyLinesBefore(importObject.getLineNumber()) == 0) {
+                                && getCountOfEmptyLinesBefore(importObject.getLineNumber()) != 1) {
                             log(importObject.getLineNumber(), MSG_LINE_SEPARATOR, fullImportIdent);
                         }
                         currentGroup = nextGroup;
