@@ -818,4 +818,18 @@ public class CustomImportOrderCheckTest extends AbstractModuleTestSupport {
         verify(checkConfig, getNonCompilablePath("InputCustomImportOrderSingleLine2.java"),
             expected);
     }
+
+    @Test
+    public void testInputCustomImportOrderSpanMultipleLines() throws Exception {
+        final DefaultConfiguration checkConfig =
+                createModuleConfig(CustomImportOrderCheck.class);
+        checkConfig.addAttribute("customImportOrderRules",
+                "STATIC###STANDARD_JAVA_PACKAGE");
+        checkConfig.addAttribute("separateLineBetweenGroups", "true");
+
+        createChecker(checkConfig);
+        final String[] expected = CommonUtil.EMPTY_STRING_ARRAY;
+        verify(checkConfig, getNonCompilablePath("InputCustomImportOrderSpanMultipleLines.java"),
+                expected);
+    }
 }
